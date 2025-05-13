@@ -1,6 +1,8 @@
 from django.contrib import admin
 from blog.models import Tag, Category, Page, Post
 from django_summernote.admin import SummernoteModelAdmin
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
@@ -53,6 +55,16 @@ class PostAdmin(SummernoteModelAdmin):
         "slug": ('title',),
     }
     autocomplete_fields = 'tags', 'category',
+
+    def link(self, obj):
+        if not obj.pk:
+            return '-'
+        url_post = obj.get_absolute_url()
+        safe_link = mark_safe(
+            f'<a target="_blank" href="{url_post}">{obj.title}</a>'
+        )
+
+        return safe_link        
 
     def save_model(self, request, obj, form, change):
         if change:
