@@ -26,16 +26,19 @@ EXPOSE 8000
 # imagem como uma nova camada.
 # Agrupar os comandos em um único RUN pode reduzir a quantidade de camadas da 
 # imagem e torná-la mais eficiente.
-RUN apt-get update && apt-get install -y netcat-openbsd && \
-  python -m venv /venv && \
+RUN python -m venv /venv && \
   /venv/bin/pip install --upgrade pip && \
   /venv/bin/pip install -r /djangoapp/requirements.txt && \
   adduser --disabled-password --no-create-home duser && \
-  mkdir -p /data/web/static /data/web/media && \
-  chown -R duser:duser /venv /data/web/static /data/web/media && \
-  chmod -R 755 /data/web/static /data/web/media && \
+  mkdir -p /data/web/static && \
+  mkdir -p /data/web/media && \
+  chown -R duser:duser /venv && \
+  chown -R duser:duser /data/web/static && \
+  chown -R duser:duser /data/web/media && \
+  chmod -R 755 /data/web/static && \
+  chmod -R 755 /data/web/media && \
   chmod -R +x /scripts
-  
+
 # Adiciona a pasta scripts e venv/bin 
 # no $PATH do container.
 ENV PATH="/scripts:/venv/bin:$PATH"
