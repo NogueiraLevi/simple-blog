@@ -1,9 +1,29 @@
 from django.contrib.auth.models import User
 from django.db import models
-from utils.rands import slugfy_new
+from django_summernote.models import AbstractAttachment
 from utils.images import resize_image
+from utils.rands import slugfy_new
+from django_summernote.models import AbstractAttachment
 
-# Create your models here.
+
+class PostAttachment(AbstractAttachment):
+    def save(self, *args, **kwargs):
+        if not self.name:
+            self.name = self.file.name
+
+        current_file_name = str(self.file.name)
+        super_save = super().save(*args, **kwargs)
+        file_changed = False
+
+        if self.file:
+            file_changed = current_file_name != self.file.name
+
+        if file_changed:
+            resize_image(self.file, 900, True, 70)
+
+        return super_save
+
+
 class Tag(models.Model):
     class Meta:
         verbose_name = 'Tag'
@@ -11,17 +31,18 @@ class Tag(models.Model):
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(
-        unique=True, default=None, 
-        null=True, blank=True
+        unique=True, default=None,
+        null=True, blank=True, max_length=255,
     )
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugfy_new(self.name)
+            self.slug = slugfy_new(self.name, 4)
         return super().save(*args, **kwargs)
-    
-    def __str__(self):
+
+    def __str__(self) -> str:
         return self.name
+
 
 class Category(models.Model):
     class Meta:
@@ -30,17 +51,16 @@ class Category(models.Model):
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(
-        unique=True, default=None, 
-        null=True, blank=True
+        unique=True, default=None,
+        null=True, blank=True, max_length=255,
     )
 
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugfy_new(self.name)
+            self.slug = slugfy_new(self.name, 4)
         return super().save(*args, **kwargs)
-    
-     
-    def __str__(self):
+
+    def __str__(self) -> str:
         return self.name
 
 
@@ -48,18 +68,25 @@ class Page(models.Model):
     title = models.CharField(max_length=65,)
     slug = models.SlugField(
         unique=True, default="",
-        null=False, blank=True,
+        null=False, blank=True, max_length=255
     )
     is_published = models.BooleanField(
         default=False,
         help_text=(
-            'This field must be checked to display publicly'),
+            'Este campo precisará estar marcado '
+            'para a página ser exibida publicamente.'
+        ),
     )
     content = models.TextField()
 
-     
-    def __str__(self):
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugfy_new(self.title, 4)
+        return super().save(*args, **kwargs)
+
+    def __str__(self) -> str:
         return self.title
+
 
 class Post(models.Model):
     class Meta:
@@ -117,10 +144,10 @@ class Post(models.Model):
         current_cover_name = str(self.cover.name)
         super_save = super().save(*args, **kwargs)
         cover_changed = False
- 
+
         if self.cover:
             cover_changed = current_cover_name != self.cover.name
- 
+
         if cover_changed:
             resize_image(self.cover, 900, True, 70)
 
