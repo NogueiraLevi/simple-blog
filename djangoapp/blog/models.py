@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 from django_summernote.models import AbstractAttachment
 from utils.images import resize_image
 from utils.rands import slugfy_new

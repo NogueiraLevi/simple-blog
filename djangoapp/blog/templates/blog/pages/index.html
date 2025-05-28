@@ -12,12 +12,14 @@
             {% endfor %}
           </div>
         {% else %}
-          <div class="NoT-Found center">
-            <h1> Nothing Here </h1>
-            <p> Nothing found at this link, 
-                please move to another link or return to
-                <a href="{% url 'blog:index' %}">Home<a/> 
+          <div class="not-found center">
+            <h1>Not Found 😔</h1>
+            <p>
+              We couldn't find anything at this link. 
+              Please click on another link from our blog or go to the
+              <a href="{% url 'blog:index' %}">Home</a>.
             </p>
+          </div>
         {% endif %}
 
       </div>
